@@ -1,0 +1,35 @@
+#
+# https://stackoverflow.com/questions/61929319/apache-nifi-behind-traefik-as-a-reverse-proxy
+#
+
+version: "3"
+
+services:
+  nifi:
+    image: apache/nifi:latest
+    container_name: nifi
+    restart: always
+    #ports:
+    #  - 9090:9090
+    environment:
+      NIFI_WEB_HTTP_PORT: 9090
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.nifi.rule=Host(`nifi.bdb`)"
+      - "traefik.http.routers.nifi.entrypoints=web"
+      - "traefik.http.services.nifi.loadbalancer.server.port=9090"
+    volumes:
+      - work:/share
+    networks:
+      - spark-net
+
+networks:
+  spark-net:
+    external:
+      name: spark-net
+
+volumes:
+  work:
+    external:
+      name: work
+
